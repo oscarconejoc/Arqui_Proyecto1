@@ -1,26 +1,21 @@
 section .data
 	inv: db "inventario.txt",0
 	cfg: db "config.ini",0
-	
-	;Datos para config
-	en_caracter: db "caracter_barra:",0
-	en_colorB: db "color_barra:",0
-	en_colorF: db "color_fondo:",0
-	len_en_caracter: equ $-en_caracter
-	len_en_colorB: equ $-en_colorB
-	len_en_colorF: equ $-en_colorF
-
+	msg_error: db 'Error en Not Found', 0xa
+	msg_len: equ $-msg_error
 
 
 section .bss
 	buf_inv resb 2048
 	buf_cfg resb 1024
 	ntt	resb 32
+	bar_char resb 3
+	color_barra resb 2
+	color_fondo resb 2
 
-	bar_ptr resq 1              ; puntero al caracter (en buf_cfg)
-	bar_len resd 1              ; longitud en bytes del caracter
- 	fg_code resd 1              ; color_barra
- 	bg_code resd 1              ; color_fondo
+	pos_uno resq 1
+	pos_dos resq 1
+	pos_tres resq 8  
 
 section .text
 	global _start
@@ -30,22 +25,131 @@ _start:
 	mov rax, 2
 	mov rdi, cfg
 	mov rsi, 0
+	mov rdx,0
 	syscall
-	mov r12, rax
 
 	;Leer config.ini
+	push rax
+	mov rdi, rax
 	mov rax, 0
-	mov rdi, r12
 	mov rsi, buf_cfg
 	mov rdx, 1024
 	syscall
 
 	;cerrar config.ini
-	mov rax, 60
+	mov rax, 3
 	pop rdi
 	syscall
 
+
+
+	;Abrir inventario.txt 
+        mov rax, 2
+        mov rdi, inv
+        mov rsi, 0
+        mov rdx,0
+        syscall
+
+        ;Leer inventario.txt
+        push rax
+        mov rdi, rax
+        mov rax, 0
+        mov rsi, buf_inv
+        mov rdx, 2048
+        syscall
+
+        ;cerrar inventario.txt
+        mov rax, 3
+        pop rdi
+        syscall
+
+
+
+
+	;Procesamiento de config.ini
+	mov rsi, buf_cfg
+find_colon0:
+	mov al, [rsi]
+	cmp al,0
+	je not_found
+	cmp al, ':'
+	je found0
+	inc rsi
+	jmp find_colon0
+
+found0: 
+	inc rsi
+	mov al, [rsi]
+	mov [bar_char], al
+	inc rsi
+	mov al, [rsi]
+	mov [bar_char+1], al
+	inc rsi
+	mov al, [rsi]
+	mov [bar_char+2], al
+	inc rsi
+	jmp find_colon1
+
+not_found:
 	mov rax,1
 	mov rdi,1
-	mov rsi,buf_cfg
-	mov rdx, 1024
+	mov rsi, msg_error
+	mov rdx, msg_len
+	jmp done0
+
+find_colon1:
+	mov al, [rsi]
+        cmp al,0
+        je not_found
+	cmp al, ':'
+	je found1
+        inc rsi
+        jmp find_colon1
+
+found1:
+	inc rsi
+        mov al, [rsi]
+        mov [color_barra], al
+	inc rsi
+        mov al, [rsi]
+        mov [color_barra+1], al
+        jmp done0
+
+
+
+done0:
+	;PRUEBAS de IMPRESION
+	;mov rax,1
+	;mov rdi,1
+	;mov rsi,buf_cfg
+	;mov rdx, 1024
+	;syscall
+
+	;PRUEBAS de IMPRESION
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi,buf_inv
+        ;mov rdx,2048
+        ;syscall
+
+ 	;Prueba de extraccion de dato
+	mov rax,1
+	mov rdi,1
+	mov rsi,bar_char
+	mov rdx,3
+	syscall
+
+	;Prueba de extraccion de dato
+        mov rax,1
+        mov rdi,1
+        mov rsi,color_barra
+        mov rdx,2
+        syscall
+
+	
+
+	;FIN
+	mov rax,60
+	mov rdi,0
+	syscall
+
