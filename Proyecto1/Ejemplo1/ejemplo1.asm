@@ -3,6 +3,9 @@ section .data
 	cfg: db "config.ini",0
 	msg_error: db 'Error en Not Found', 0xa
 	msg_len: equ $-msg_error
+	esc: db 0x1b,'['
+	semi: db ';'
+	end: db 'm'
 
 
 section .bss
@@ -15,7 +18,7 @@ section .bss
 
 	pos_uno resq 1
 	pos_dos resq 1
-	pos_tres resq 8  
+	str_color resb 8  
 
 section .text
 	global _start
@@ -113,7 +116,50 @@ found1:
 	inc rsi
         mov al, [rsi]
         mov [color_barra+1], al
+	inc rsi
+        jmp find_colon2
+
+find_colon2:
+        mov al, [rsi]
+        cmp al,0
+        je not_found
+        cmp al, ':'
+        je found2
+        inc rsi
+        jmp find_colon2
+
+found2:
+        inc rsi
+        mov al, [rsi]
+        mov [color_fondo], al
+        inc rsi
+        mov al, [rsi]
+        mov [color_fondo+1], al
+        inc rsi
         jmp done0
+
+copy_z:
+  .loop:
+        mov al, [rsi]
+        mov [rdi], al
+        inc rsi
+        inc rdi
+        dec rcx
+        jnz .loop
+    ret
+
+strlen:
+    mov rax, rdi
+  .len_loop:
+    cmp byte [rax], 0
+    je  .len_done
+    inc rax
+    jmp .len_loop
+  .len_done:
+    sub rax, rdi
+    ret
+
+
 
 
 
@@ -132,6 +178,45 @@ done0:
         ;mov rdx,2048
         ;syscall
 
+
+
+
+
+	;Concatenacion de str para color
+	lea rdi, [str_color]
+	mov rsi, esc
+	mov rcx, 2
+	call copy_z
+	mov rsi, color_barra
+	mov rcx, 2
+	call copy_z
+	mov byte [rdi], ';'
+	inc rdi
+	mov rsi, color_fondo
+	mov rcx, 2
+	call copy_z
+	mov byte [rdi], 'm'	
+
+
+
+
+
+
+
+
+
+
+
+
+
+	;Cambio de Color
+        mov rax,1
+        mov rdi,1
+        mov rsi,str_color
+        mov rdx,8
+        syscall
+	
+
  	;Prueba de extraccion de dato
 	mov rax,1
 	mov rdi,1
@@ -145,6 +230,13 @@ done0:
         mov rsi,color_barra
         mov rdx,2
         syscall
+
+	;Prueba de extraccion de dato
+	mov rax,1
+	mov rdi,1
+	mov rsi,color_fondo
+	mov rdx,2
+	syscall
 
 	
 
