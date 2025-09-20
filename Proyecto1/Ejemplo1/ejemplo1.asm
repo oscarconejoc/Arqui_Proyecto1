@@ -299,6 +299,94 @@ fruta_encontrada3:
         ret
 
 
+find_cantidad0:
+ .loop:
+        mov al, [rsi]
+        cmp al,0
+        je not_found
+        cmp al, ':'
+        je .found
+        inc rsi
+        jmp .loop
+
+ .found:
+        inc rsi
+        mov al, [rsi]
+        mov [cantidad_manzanas], al
+        inc rsi
+        mov al, [rsi]
+        mov [cantidad_manzanas+1], al
+        inc rsi
+        jmp .salir
+
+ .salir:
+	ret 
+
+find_cantidad1:
+ .loop:
+        mov al, [rsi]
+        cmp al,0
+        je not_found
+        cmp al, ':'
+        je .found
+        inc rsi
+        jmp .loop
+
+ .found:
+        inc rsi
+        mov al, [rsi]
+        mov [cantidad_peras], al
+        inc rsi
+        jmp .salir
+
+ .salir:
+        ret
+
+find_cantidad2:
+ .loop:
+        mov al, [rsi]
+        cmp al,0
+        je not_found
+        cmp al, ':'
+        je .found
+        inc rsi
+        jmp .loop
+
+ .found:
+        inc rsi
+        mov al, [rsi]
+        mov [cantidad_naranjas], al
+        inc rsi
+        mov al, [rsi]
+        mov [cantidad_naranjas+1], al
+        inc rsi
+        jmp .salir
+
+ .salir:
+        ret
+
+
+find_cantidad3:
+ .loop:
+        mov al, [rsi]
+        cmp al,0
+        je not_found
+        cmp al, ':'
+        je .found
+        inc rsi
+        jmp .loop
+
+ .found:
+        inc rsi
+        mov al, [rsi]
+        mov [cantidad_kiwis], al
+        inc rsi
+        jmp .salir
+
+ .salir:
+        ret
+
+
 done0:
 	;PRUEBAS de IMPRESION
 	;mov rax,1
@@ -347,8 +435,12 @@ done0:
 	xor r12, r12
         call fruta_encontrada3
 
+	mov rsi, buf_inv
+	call find_cantidad0
 	
-
+	call find_cantidad1
+	call find_cantidad2
+	call find_cantidad3
 
 
 
@@ -415,8 +507,33 @@ done0:
         mov rdx,6
         syscall
 
-	
+	;Prueba de Extraccionde de cantidad
+	mov rax,1
+	mov rdi,1
+	mov rsi, cantidad_manzanas
+	mov rdx,2
+	syscall
 
+	;Prueba de Extraccionde de cantidad
+        mov rax,1
+        mov rdi,1
+        mov rsi, cantidad_peras
+        mov rdx,1
+        syscall
+
+	;Prueba de Extraccionde de cantidad
+        mov rax,1
+        mov rdi,1
+        mov rsi, cantidad_naranjas
+        mov rdx,2
+        syscall
+
+	;Prueba de Extraccionde de cantidad
+        mov rax,1
+        mov rdi,1
+        mov rsi, cantidad_kiwis
+        mov rdx,1
+        syscall
 
 
 
