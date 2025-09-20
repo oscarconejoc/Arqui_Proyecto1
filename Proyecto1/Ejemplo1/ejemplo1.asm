@@ -454,21 +454,20 @@ print_z:
     	ret
 
 imprimir_frutas:
-    	mov rcx, frutas_count
-    	xor rdi, rdi                ; índice = 0
-.next_fruit:
-    	mov rsi, [frutas + rdi*8]   ; puntero a string
+    	xor  ebx, ebx                ; i = 0
+ .next:
+    	cmp  ebx, frutas_count
+    	jae  .done
+    	mov  rsi, [frutas + rbx*8]
     	call print_z
-
-    	; imprimir salto de línea
-    	mov rax, 1
-    	mov rdi, 1
-    	mov rsi, nl
-    	mov rdx, 1
+    	mov  eax,1
+    	mov  edi,1
+    	lea  rsi, [rel nl]
+    	mov  edx,1
     	syscall
-
-    	inc rdi
-    	loop .next_fruit
+    	inc  ebx
+    	jmp  .next
+ .done:
     	ret
 
 
@@ -509,7 +508,17 @@ done0:
 	mov rsi, color_fondo
 	mov rcx, 2
 	call copy_z
-	mov byte [rdi], 'm'	
+	mov byte [rdi], 'm'
+
+
+	;Cambio de Color
+        mov rax,1
+        mov rdi,1
+        mov rsi,str_color
+        mov rdx,8
+        syscall
+
+	
 
 	;procesamiento de datos de inventario.txt
 	mov rsi, buf_inv
@@ -565,14 +574,6 @@ done0:
 	
 	;Imprimir inventario ordenado
 	call imprimir_frutas
-
-
-	;Cambio de Color
-        mov rax,1
-        mov rdi,1
-        mov rsi,str_color
-        mov rdx,8
-        syscall
 	
 
  	;Prueba de extraccion de dato
