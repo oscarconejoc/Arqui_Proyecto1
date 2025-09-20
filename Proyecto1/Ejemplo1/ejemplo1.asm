@@ -8,6 +8,10 @@ section .data
 	end: db 'm'
 	nl: db 10   ; '\n'
 	frutas_count: equ 4
+	; Reset Code: Resets terminal colors to default
+    	reset_color db 0x1b, "[0m"
+    	reset_color_len equ $ - reset_color
+
 
 
 section .bss
@@ -460,6 +464,7 @@ imprimir_frutas:
     	jae  .done
     	mov  rsi, [frutas + rbx*8]
     	call print_z
+	call imprimir_cantidad
     	mov  eax,1
     	mov  edi,1
     	lea  rsi, [rel nl]
@@ -470,7 +475,111 @@ imprimir_frutas:
  .done:
     	ret
 
+imprimir_cantidad:
+	xor r8d, r8d
+	mov al, [rsi]
+	mov r12, rsi
+	cmp al, 'k'
+	je .kiwis
+	cmp al, 'm'
+	je .manzanas
+	cmp al, 'n'
+	je .naranjas
+	cmp al, 'p'
+	je .peras
 
+ .kiwis:
+	mov ecx, 5
+	cmp r8d, ecx
+	je .donekiwis
+	;Impresion de caracter de barra
+        mov rax,1
+        mov rdi,1
+        mov rsi,bar_char
+        mov rdx,3
+        syscall
+	inc r8d
+	jmp .kiwis
+
+ .donekiwis:
+	;Impresion de numero de kiwis
+        mov rax,1
+        mov rdi,1
+        mov rsi, cantidad_kiwis
+        mov rdx,1
+        syscall
+	mov rsi, r12
+	ret
+
+.manzanas:
+        mov ecx, 12
+        cmp r8d, ecx
+        je .donemanzanas
+        ;Impresion de caracter de barra
+        mov rax,1
+        mov rdi,1
+        mov rsi,bar_char
+        mov rdx,3
+        syscall
+        inc r8d
+        jmp .manzanas
+
+ .donemanzanas:
+        ;Impresion de numero de kiwis
+        mov rax,1
+        mov rdi,1
+        mov rsi, cantidad_manzanas
+        mov rdx,2
+        syscall
+	mov rsi, r12
+        ret
+
+.naranjas:
+        mov ecx, 25
+        cmp r8d, ecx
+        je .donenaranjas
+        ;Impresion de caracter de barra
+        mov rax,1
+        mov rdi,1
+        mov rsi,bar_char
+        mov rdx,3
+        syscall
+        inc r8d
+        jmp .naranjas
+
+ .donenaranjas:
+        ;Impresion de numero de kiwis
+        mov rax,1
+        mov rdi,1
+        mov rsi, cantidad_naranjas
+        mov rdx,2
+        syscall
+	mov rsi, r12
+        ret
+.peras:
+        mov ecx, 8
+        cmp r8d, ecx
+        je .doneperas
+        ;Impresion de caracter de barra
+        mov rax,1
+        mov rdi,1
+        mov rsi,bar_char
+        mov rdx,3
+        syscall
+        inc r8d
+        jmp .peras
+
+ .doneperas:
+        ;Impresion de numero de kiwis
+        mov rax,1
+        mov rdi,1
+        mov rsi, cantidad_peras
+        mov rdx,1
+        syscall
+	mov rsi, r12
+        ret
+
+	
 
 
 
@@ -577,81 +686,89 @@ done0:
 	
 
  	;Prueba de extraccion de dato
-	mov rax,1
-	mov rdi,1
-	mov rsi,bar_char
-	mov rdx,3
-	syscall
+	;mov rax,1
+	;mov rdi,1
+	;mov rsi,bar_char
+	;mov rdx,3
+	;syscall
 
 	;Prueba de extraccion de dato
-        mov rax,1
-        mov rdi,1
-        mov rsi,color_barra
-        mov rdx,2
-        syscall
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi,color_barra
+        ;mov rdx,2
+        ;syscall
 
 	;Prueba de extraccion de dato
-	mov rax,1
-	mov rdi,1
-	mov rsi,color_fondo
-	mov rdx,2
-	syscall
+	;mov rax,1
+	;mov rdi,1
+	;mov rsi,color_fondo
+	;mov rdx,2
+	;syscall
 
 	;Prueba de extraccion de fruta
-	mov rax,1
-	mov rdi,1
-	mov rsi,manzanas
-	mov rdx,10
-	syscall
+	;mov rax,1
+	;mov rdi,1
+	;mov rsi,manzanas
+	;mov rdx,10
+	;syscall
 
 	;Prueba de extraccion de fruta
-        mov rax,1
-        mov rdi,1
-        mov rsi,peras
-        mov rdx,7
-        syscall
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi,peras
+        ;mov rdx,7
+        ;syscall
 
 	;Prueba de extraccion de fruta
-        mov rax,1
-        mov rdi,1
-        mov rsi,naranjas
-        mov rdx,10
-        syscall
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi,naranjas
+        ;mov rdx,10
+        ;syscall
 
         ;Prueba de extraccion de fruta
-        mov rax,1
-        mov rdi,1
-        mov rsi,kiwis
-        mov rdx,7
-        syscall
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi,kiwis
+        ;mov rdx,7
+        ;syscall
 
 	;Prueba de Extraccionde de cantidad
-	mov rax,1
-	mov rdi,1
-	mov rsi, cantidad_manzanas
-	mov rdx,2
-	syscall
+	;mov rax,1
+	;mov rdi,1
+	;mov rsi, cantidad_manzanas
+	;mov rdx,2
+	;syscall
 
 	;Prueba de Extraccionde de cantidad
-        mov rax,1
-        mov rdi,1
-        mov rsi, cantidad_peras
-        mov rdx,1
-        syscall
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi, cantidad_peras
+        ;mov rdx,1
+        ;syscall
 
 	;Prueba de Extraccionde de cantidad
-        mov rax,1
-        mov rdi,1
-        mov rsi, cantidad_naranjas
-        mov rdx,2
-        syscall
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi, cantidad_naranjas
+        ;mov rdx,2
+        ;syscall
 
 	;Prueba de Extraccionde de cantidad
-        mov rax,1
-        mov rdi,1
-        mov rsi, cantidad_kiwis
-        mov rdx,1
-        syscall
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi, cantidad_kiwis
+        ;mov rdx,1
+        ;syscall
+
+	; --- Reset the terminal color to default ---
+   	mov rax, 1
+    	mov rdi, 1
+    	mov rsi, reset_color
+    	mov rdx, reset_color_len
+    	syscall
+
 
 
 
