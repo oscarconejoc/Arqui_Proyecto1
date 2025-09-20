@@ -6,6 +6,8 @@ section .data
 	esc: db 0x1b,'['
 	semi: db ';'
 	end: db 'm'
+	nl: db 10   ; '\n'
+	frutas_count: equ 4
 
 
 section .bss
@@ -15,17 +17,20 @@ section .bss
 	bar_char resb 3
 	color_barra resb 2
 	color_fondo resb 2
-	manzanas resb 9
-	peras resb 6
-	naranjas resb 9
-	kiwis resb 6
+	manzanas resb 10
+	peras resb 7
+	naranjas resb 10
+	kiwis resb 7
 	cantidad_manzanas resb 2
 	cantidad_peras resb 1
 	cantidad_naranjas resb 2
 	cantidad_kiwis resb 1
+	entero_manzanas resb 1
+	entero_peras resb 1
+	entero_naranjas resb 1
+	entero_kiwis resb 1
 
-	pos_uno resq 1
-	pos_dos resq 1
+	frutas resq 4
 	str_color resb 8  
 
 section .text
@@ -156,16 +161,6 @@ copy_z:
         jnz .loop
     ret
 
-strlen:
-    mov rax, rdi
-  .len_loop:
-    cmp byte [rax], 0
-    je  .len_done
-    inc rax
-    jmp .len_loop
-  .len_done:
-    sub rax, rdi
-    ret
 
 
 
@@ -184,6 +179,7 @@ fruta_encontrada0:
  .fin:
         mov byte[manzanas + r12], ':'
         inc r12
+	mov byte[manzanas + r12], 0
         inc rsi
         jmp .cambiar_linea
 
@@ -217,6 +213,7 @@ fruta_encontrada1:
  .fin:
         mov byte[peras + r12], ':'
 	inc r12
+	mov byte[peras + r12], 0
 	inc rsi
         jmp .cambiar_linea
 
@@ -249,6 +246,7 @@ fruta_encontrada2:
  .fin:
         mov byte[naranjas + r12], ':'
         inc r12
+	mov byte[naranjas + r12], 0
         inc rsi
         jmp .cambiar_linea
 
@@ -282,6 +280,7 @@ fruta_encontrada3:
  .fin:
         mov byte[kiwis + r12], ':'
         inc r12
+	mov byte[kiwis + r12], 0
         inc rsi
         jmp .cambiar_linea
 
@@ -386,6 +385,97 @@ find_cantidad3:
  .salir:
         ret
 
+ascii_to_int:
+    	xor rax, rax            ; acumulador = 0
+ .siguiente_digito:
+    	mov al, [rsi]           ; lee un byte
+    	cmp al, 0               ; fin de string?
+    	je  .done
+    	cmp al, 10              ; '\n'?
+    	je  .done
+
+    	sub al, '0'             ; convierte ASCII a valor (ej. '9'->9)
+    	imul rax, rax, 10       ; acum = acum * 10
+    	add rax, rdx            ; acum = acum + dígito
+
+    	inc rsi
+    	jmp .siguiente_digito
+
+ .done:
+    	ret
+
+
+ordenar_frutas:
+     	mov r8d, frutas_count    ; r8d = n
+    	dec r8d                  ; outer = n-1
+ .outer_loop:
+    	xor edi, edi             ; i = 0
+ .inner_loop:
+    	mov rsi, [frutas + rdi*8]          ; frutas[i]
+    	mov rdx, [frutas + rdi*8 + 8]      ; frutas[i+1]
+
+    	mov al, [rsi]             ; primer letra de frutas[i]
+    	mov bl, [rdx]             ; primer letra de frutas[i+1]
+    	cmp al, bl
+    	jbe .no_swap
+
+    	; swap punteros
+    	mov rax, rsi
+    	mov [frutas + rdi*8], rdx
+    	mov [frutas + rdi*8 + 8], rax
+
+.no_swap:
+    	inc edi
+    	cmp edi, r8d              ; mientras i < outer
+    	jb .inner_loop
+
+    	dec r8d
+    	jnz .outer_loop
+    	ret
+
+strlen:
+    	xor rax, rax
+ .len_loop:
+    	cmp byte [rsi+rax], 0
+    	je  .done
+    	inc rax
+    	jmp .len_loop
+ .done:
+    	ret
+
+print_z:
+    	push rsi            ; guardar puntero
+    	call strlen         ; calcula longitud en RAX
+    	pop rsi             ; recupera puntero
+    	mov rdx, rax        ; longitud
+    	mov rax, 1          ; syscall write
+    	mov rdi, 1          ; fd = stdout
+    	syscall
+    	ret
+
+imprimir_frutas:
+    	mov rcx, frutas_count
+    	xor rdi, rdi                ; índice = 0
+.next_fruit:
+    	mov rsi, [frutas + rdi*8]   ; puntero a string
+    	call print_z
+
+    	; imprimir salto de línea
+    	mov rax, 1
+    	mov rdi, 1
+    	mov rsi, nl
+    	mov rdx, 1
+    	syscall
+
+    	inc rdi
+    	loop .next_fruit
+    	ret
+
+
+
+
+
+
 
 done0:
 	;PRUEBAS de IMPRESION
@@ -421,7 +511,7 @@ done0:
 	call copy_z
 	mov byte [rdi], 'm'	
 
-
+	;procesamiento de datos de inventario.txt
 	mov rsi, buf_inv
 	xor r12, r12
 	call fruta_encontrada0
@@ -441,13 +531,40 @@ done0:
 	call find_cantidad1
 	call find_cantidad2
 	call find_cantidad3
+	
+	;Ascii a enteros
+	mov rsi, cantidad_manzanas
+	call ascii_to_int
+	mov [entero_manzanas], rax
+	mov rsi, cantidad_peras
+        call ascii_to_int
+        mov [entero_peras], rax
+	mov rsi, cantidad_naranjas
+        call ascii_to_int
+        mov [entero_naranjas], rax
+	mov rsi, cantidad_kiwis
+        call ascii_to_int
+        mov [entero_kiwis], rax
 
 
+	;Creando arreglo de punteros
+	mov rax, manzanas
+	mov [frutas + 0*8],rax
 
+	mov rax, peras
+        mov [frutas + 1*8],rax
 
+	mov rax, naranjas
+        mov [frutas + 2*8],rax
 
+	mov rax, kiwis
+        mov [frutas + 3*8],rax
 
-
+	;Llamando a ordenar de forma alfabetica los punteros
+	call ordenar_frutas
+	
+	;Imprimir inventario ordenado
+	call imprimir_frutas
 
 
 	;Cambio de Color
@@ -483,28 +600,28 @@ done0:
 	mov rax,1
 	mov rdi,1
 	mov rsi,manzanas
-	mov rdx,9
+	mov rdx,10
 	syscall
 
 	;Prueba de extraccion de fruta
         mov rax,1
         mov rdi,1
         mov rsi,peras
-        mov rdx,6
+        mov rdx,7
         syscall
 
 	;Prueba de extraccion de fruta
         mov rax,1
         mov rdi,1
         mov rsi,naranjas
-        mov rdx,9
+        mov rdx,10
         syscall
 
         ;Prueba de extraccion de fruta
         mov rax,1
         mov rdi,1
         mov rsi,kiwis
-        mov rdx,6
+        mov rdx,7
         syscall
 
 	;Prueba de Extraccionde de cantidad
