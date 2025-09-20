@@ -489,6 +489,13 @@ imprimir_cantidad:
 	je .peras
 
  .kiwis:
+	;Cambio de Color
+        mov rax,1
+        mov rdi,1
+        mov rsi,str_color
+        mov rdx,8
+        syscall
+
 	mov ecx, 5
 	cmp r8d, ecx
 	je .donekiwis
@@ -502,6 +509,13 @@ imprimir_cantidad:
 	jmp .kiwis
 
  .donekiwis:
+	; --- Reset the terminal color to default ---
+        mov rax, 1
+        mov rdi, 1
+        mov rsi, reset_color
+        mov rdx, reset_color_len
+        syscall
+
 	;Impresion de numero de kiwis
         mov rax,1
         mov rdi,1
@@ -512,6 +526,13 @@ imprimir_cantidad:
 	ret
 
 .manzanas:
+	;Cambio de Color
+        mov rax,1
+        mov rdi,1
+        mov rsi,str_color
+        mov rdx,8
+        syscall
+
         mov ecx, 12
         cmp r8d, ecx
         je .donemanzanas
@@ -525,7 +546,14 @@ imprimir_cantidad:
         jmp .manzanas
 
  .donemanzanas:
-        ;Impresion de numero de kiwis
+	; --- Reset the terminal color to default ---
+        mov rax, 1
+        mov rdi, 1
+        mov rsi, reset_color
+        mov rdx, reset_color_len
+        syscall
+
+        ;Impresion de numero de manzanas
         mov rax,1
         mov rdi,1
         mov rsi, cantidad_manzanas
@@ -535,6 +563,13 @@ imprimir_cantidad:
         ret
 
 .naranjas:
+	;Cambio de Color
+        mov rax,1
+        mov rdi,1
+        mov rsi,str_color
+        mov rdx,8
+        syscall
+
         mov ecx, 25
         cmp r8d, ecx
         je .donenaranjas
@@ -548,7 +583,14 @@ imprimir_cantidad:
         jmp .naranjas
 
  .donenaranjas:
-        ;Impresion de numero de kiwis
+	; --- Reset the terminal color to default ---
+        mov rax, 1
+        mov rdi, 1
+        mov rsi, reset_color
+        mov rdx, reset_color_len
+        syscall
+
+        ;Impresion de numero de naranjas
         mov rax,1
         mov rdi,1
         mov rsi, cantidad_naranjas
@@ -557,6 +599,13 @@ imprimir_cantidad:
 	mov rsi, r12
         ret
 .peras:
+	;Cambio de Color
+        mov rax,1
+        mov rdi,1
+        mov rsi,str_color
+        mov rdx,8
+        syscall
+
         mov ecx, 8
         cmp r8d, ecx
         je .doneperas
@@ -570,7 +619,14 @@ imprimir_cantidad:
         jmp .peras
 
  .doneperas:
-        ;Impresion de numero de kiwis
+	; --- Reset the terminal color to default ---
+        mov rax, 1
+        mov rdi, 1
+        mov rsi, reset_color
+        mov rdx, reset_color_len
+        syscall
+
+        ;Impresion de numero de peras
         mov rax,1
         mov rdi,1
         mov rsi, cantidad_peras
@@ -621,11 +677,11 @@ done0:
 
 
 	;Cambio de Color
-        mov rax,1
-        mov rdi,1
-        mov rsi,str_color
-        mov rdx,8
-        syscall
+        ;mov rax,1
+        ;mov rdi,1
+        ;mov rsi,str_color
+        ;mov rdx,8
+        ;syscall
 
 	
 
@@ -763,11 +819,11 @@ done0:
         ;syscall
 
 	; --- Reset the terminal color to default ---
-   	mov rax, 1
-    	mov rdi, 1
-    	mov rsi, reset_color
-    	mov rdx, reset_color_len
-    	syscall
+   	;mov rax, 1
+    	;mov rdi, 1
+    	;mov rsi, reset_color
+    	;mov rdx, reset_color_len
+    	;syscall
 
 
 
